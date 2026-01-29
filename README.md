@@ -236,7 +236,7 @@ This project is licensed under the MIT License.
 
 ## 👥 Contributors
 
-- Your Name - Initial work
+- Anshit Puri
 
 ## 🤝 Contributing
 
