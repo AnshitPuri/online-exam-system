@@ -1,81 +1,89 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Lock, UserPlus } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import Input from '../components/common/Input'
-import Button from '../components/common/Button'
-import { validateEmail, validatePassword, validateName } from '../utils/helpers'
-import { APP_NAME } from '../utils/constants'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { User, Mail, Lock, UserPlus } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import Input from "../components/common/Input";
+import Button from "../components/common/Button";
+import {
+  validateEmail,
+  validatePassword,
+  validateName,
+} from "../utils/helpers";
+import { APP_NAME } from "../utils/constants";
 
 const Register = () => {
-  const navigate = useNavigate()
-  const { register } = useAuth()
-  
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'student'
-  })
-  
-  const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
-  const [apiError, setApiError] = useState('')
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "student",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-    setApiError('')
-  }
+    setApiError("");
+  };
 
   const validate = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!validateName(formData.name)) {
-      newErrors.name = 'Name must be at least 3 characters'
+      newErrors.name = "Name must be at least 3 characters";
     }
 
     if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validate()) return
+    e.preventDefault();
 
-    setLoading(true)
-    setApiError('')
+    if (!validate()) return;
 
-    const { confirmPassword, ...submitData } = formData
-    const result = await register(submitData)
+    setLoading(true);
+    setApiError("");
+
+    const { confirmPassword, name, ...rest } = formData;
+    const submitData = {
+      ...rest,
+      full_name: name, // ← Backend expects full_name
+    };
+    const result = await register(submitData);
 
     if (result.success) {
-      navigate('/login', { 
-        state: { message: 'Registration successful! Please login.' }
-      })
+      navigate("/login", {
+        state: { message: "Registration successful! Please login." },
+      });
     } else {
-      setApiError(result.error)
+      setApiError(result.error);
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4 py-12">
@@ -151,29 +159,41 @@ const Register = () => {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, role: 'student' }))}
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, role: "student" }))
+                  }
                   className={`p-4 border-2 rounded-lg transition-all ${
-                    formData.role === 'student'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-300 hover:border-primary-300'
+                    formData.role === "student"
+                      ? "border-primary-600 bg-primary-50"
+                      : "border-gray-300 hover:border-primary-300"
                   }`}
                 >
-                  <User className={`mx-auto mb-2 ${formData.role === 'student' ? 'text-primary-600' : 'text-gray-400'}`} />
-                  <p className={`font-medium ${formData.role === 'student' ? 'text-primary-600' : 'text-gray-600'}`}>
+                  <User
+                    className={`mx-auto mb-2 ${formData.role === "student" ? "text-primary-600" : "text-gray-400"}`}
+                  />
+                  <p
+                    className={`font-medium ${formData.role === "student" ? "text-primary-600" : "text-gray-600"}`}
+                  >
                     Student
                   </p>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, role: 'admin' }))}
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, role: "admin" }))
+                  }
                   className={`p-4 border-2 rounded-lg transition-all ${
-                    formData.role === 'admin'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-300 hover:border-primary-300'
+                    formData.role === "admin"
+                      ? "border-primary-600 bg-primary-50"
+                      : "border-gray-300 hover:border-primary-300"
                   }`}
                 >
-                  <User className={`mx-auto mb-2 ${formData.role === 'admin' ? 'text-primary-600' : 'text-gray-400'}`} />
-                  <p className={`font-medium ${formData.role === 'admin' ? 'text-primary-600' : 'text-gray-600'}`}>
+                  <User
+                    className={`mx-auto mb-2 ${formData.role === "admin" ? "text-primary-600" : "text-gray-400"}`}
+                  />
+                  <p
+                    className={`font-medium ${formData.role === "admin" ? "text-primary-600" : "text-gray-600"}`}
+                  >
                     Admin
                   </p>
                 </button>
@@ -193,8 +213,11 @@ const Register = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-primary-600 font-medium hover:text-primary-700">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-primary-600 font-medium hover:text-primary-700"
+              >
                 Sign in
               </Link>
             </p>
@@ -208,7 +231,7 @@ const Register = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
