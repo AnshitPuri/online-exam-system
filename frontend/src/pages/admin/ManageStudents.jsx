@@ -22,7 +22,7 @@ const ManageStudents = () => {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = filterBySearchTerm(students, searchTerm, ['name', 'email'])
+      const filtered = filterBySearchTerm(students, searchTerm, ['full_name', 'email'])
       setFilteredStudents(filtered)
     } else {
       setFilteredStudents(students)

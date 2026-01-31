@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, FileText } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
+import { BookOpen } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { studentAPI } from '../../services/api'
 import ExamCard from '../../components/student/ExamCard'
@@ -7,14 +8,17 @@ import Loader from '../../components/common/Loader'
 import { handleError } from '../../utils/helpers'
 
 const StudentDashboard = () => {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [exams, setExams] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetchExams()
-  }, [])
+    // Only fetch when auth is ready and user exists
+    if (!authLoading && user) {
+      fetchExams()
+    }
+  }, [authLoading, user])
 
   const fetchExams = async () => {
     try {
@@ -29,6 +33,20 @@ const StudentDashboard = () => {
     }
   }
 
+  // Wait for auth to load
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader size="lg" text="Loading..." />
+      </div>
+    )
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -41,7 +59,7 @@ const StudentDashboard = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.name}!
+          Welcome back, {user?.full_name}!
         </h1>
         <p className="text-gray-600">Here are your available exams</p>
       </div>

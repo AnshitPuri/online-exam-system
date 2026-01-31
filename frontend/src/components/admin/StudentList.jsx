@@ -60,11 +60,11 @@ const StudentList = ({ students, onToggleStatus, onDelete }) => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
                       <span className="text-primary-700 font-medium">
-                        {student.name.charAt(0).toUpperCase()}
+                        {student.full_name?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{student.name}</div>
+                      <div className="text-sm font-medium text-gray-900">{student.full_name}</div>
                     </div>
                   </div>
                 </td>
@@ -117,7 +117,7 @@ const StudentList = ({ students, onToggleStatus, onDelete }) => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
         title="Delete Student"
-        message={`Are you sure you want to delete ${selectedStudent?.name}? This action cannot be undone.`}
+        message={`Are you sure you want to delete ${selectedStudent?.full_name}? This action cannot be undone.`}
         confirmText="Delete"
         variant="danger"
       />

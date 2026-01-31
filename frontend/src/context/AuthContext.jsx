@@ -27,23 +27,48 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  const login = async (credentials) => {
-    try {
-      const response = await authAPI.login(credentials)
-      const { token, user: userData } = response.data
-      
-      localStorage.setItem(TOKEN_KEY, token)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      setUser(userData)
-      
-      return { success: true, user: userData }
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
-      }
+const login = async (credentials) => {
+  try {
+    setLoading(true)  // ← Add this
+    console.log('Attempting login...')
+    const response = await authAPI.login(credentials)
+    console.log('Full response:', response)
+    console.log('Response data:', response.data)
+    
+    const { access_token, user: userData } = response.data
+    
+    console.log('Extracted access_token:', access_token)
+    console.log('Extracted user:', userData)
+    console.log('TOKEN_KEY:', TOKEN_KEY)
+    console.log('USER_KEY:', USER_KEY)
+    
+    if (!access_token) {
+      alert('ERROR: No access token received!')
+      setLoading(false)  // ← Add this
+      return { success: false, error: 'No access token' }
+    }
+    
+    localStorage.setItem(TOKEN_KEY, access_token)
+    localStorage.setItem(USER_KEY, JSON.stringify(userData))
+    
+    console.log('After save - Token in storage:', localStorage.getItem(TOKEN_KEY))
+    console.log('After save - User in storage:', localStorage.getItem(USER_KEY))
+    
+    setUser(userData)
+    setLoading(false)  // ← Add this
+    
+    return { success: true, user: userData }
+  } catch (error) {
+    console.error('Login error:', error)
+    console.error('Error response:', error.response?.data)
+    setLoading(false)  // ← Add this
+    return { 
+      success: false, 
+      error: error.response?.data?.detail || 'Login failed' 
     }
   }
+}
+
 
   const register = async (userData) => {
     try {

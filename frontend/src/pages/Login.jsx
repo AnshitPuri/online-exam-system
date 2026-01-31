@@ -45,23 +45,33 @@ const Login = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+  e.preventDefault()
+  
+  if (!validate()) return
+
+  setLoading(true)
+  setApiError('')
+
+  const result = await login(formData)
+  
+  console.log('Login result:', result)
+  console.log('Token after login:', localStorage.getItem('auth_token'))
+
+  if (result.success) {
+    console.log('About to navigate...')
+    console.log('Token before navigate:', localStorage.getItem('auth_token'))
     
-    if (!validate()) return
-
-    setLoading(true)
-    setApiError('')
-
-    const result = await login(formData)
-
-    if (result.success) {
-      navigate(result.user.role === 'admin' ? '/admin' : '/student')
-    } else {
-      setApiError(result.error)
-    }
+    // Add a small delay to ensure state updates
+    await new Promise(resolve => setTimeout(resolve, 500))
     
-    setLoading(false)
+    console.log('Token after delay:', localStorage.getItem('auth_token'))
+    navigate(result.user.role === 'admin' ? '/admin' : '/student')
+  } else {
+    setApiError(result.error)
   }
+  
+  setLoading(false)
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4 py-12">
