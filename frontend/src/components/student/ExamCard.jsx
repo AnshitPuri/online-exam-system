@@ -16,7 +16,7 @@ const ExamCard = ({ exam }) => {
     }
   }
 
-  const isAttempted = exam.is_attempted
+  const isAttempted = exam.has_attempted
 
   return (
     <Card hover className="border-l-4 border-l-primary-600">
@@ -33,7 +33,7 @@ const ExamCard = ({ exam }) => {
             </div>
             <div>
               <p className="text-xs text-gray-500">Duration</p>
-              <p className="font-medium text-gray-900">{exam.duration} mins</p>
+              <p className="font-medium text-gray-900">{exam.duration_minutes} mins</p>
             </div>
           </div>
 

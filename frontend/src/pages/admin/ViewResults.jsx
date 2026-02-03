@@ -46,7 +46,7 @@ const ViewResults = () => {
     let filtered = [...results]
 
     if (searchTerm) {
-      filtered = filterBySearchTerm(filtered, searchTerm, ['student.name', 'student.email', 'exam.title'])
+      filtered = filterBySearchTerm(filtered, searchTerm, ['student_name', 'student_email', 'exam_title'])
     }
 
     if (selectedExam) {

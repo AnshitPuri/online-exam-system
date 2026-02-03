@@ -5,7 +5,7 @@ import { adminAPI } from '../../services/api'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import Loader from '../../components/common/Loader'
-import { handleError, formatDateTime, calculatePercentage } from '../../utils/helpers'
+import { handleError, formatDateTime } from '../../utils/helpers'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -194,17 +194,16 @@ const AdminDashboard = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {recentResults.map((result) => {
-                  const percentage = calculatePercentage(result.marks_obtained, result.exam.total_marks)
-                  const passingPercentage = (result.exam.passing_marks / result.exam.total_marks) * 100
-                  const isPassed = percentage >= passingPercentage
+                  const percentage = result.percentage || 0
+                  const isPassed = result.passed
                   
                   return (
                     <tr key={result.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{result.student.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{result.exam.title}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{result.student_name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{result.exam_title}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{formatDateTime(result.submitted_at)}</td>
-                      <td className="px-4 py-3 text-sm text-center font-medium">
-                        {result.marks_obtained}/{result.exam.total_marks} ({percentage}%)
+                      <td className="px-4 py-3 text-sm center font-medium">
+                        {result.score}/{result.total_marks} ({percentage}%)
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${

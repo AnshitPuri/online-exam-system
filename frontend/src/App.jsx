@@ -24,6 +24,7 @@ import ManageExams from './pages/admin/ManageExams'
 import ManageQuestions from './pages/admin/ManageQuestions'
 import ViewResults from './pages/admin/ViewResults'
 import ManageStudents from './pages/admin/ManageStudents'
+import ResultDetail from './pages/admin/ResultDetail'
 
 function App() {
   const { user, loading } = useAuth()
@@ -53,6 +54,7 @@ function App() {
         <Route path="exam/:examId/instructions" element={<ExamInstructions />} />
         <Route path="exam/:examId/start" element={<ExamInterface />} />
         <Route path="exam/:examId/result" element={<ExamResult />} />
+        <Route path="results/:attemptId" element={<ExamResult />} />
         <Route path="results" element={<MyResults />} />
       </Route>
 
@@ -67,6 +69,7 @@ function App() {
         <Route path="manage-exams" element={<ManageExams />} />
         <Route path="manage-questions/:examId" element={<ManageQuestions />} />
         <Route path="view-results" element={<ViewResults />} />
+        <Route path="results/:attemptId" element={<ResultDetail />} />
         <Route path="manage-students" element={<ManageStudents />} />
       </Route>
 

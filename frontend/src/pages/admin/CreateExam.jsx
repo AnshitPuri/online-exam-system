@@ -18,7 +18,17 @@ const CreateExam = () => {
       setError(null)
       setSuccess(false)
 
-      const response = await adminAPI.createExam(formData)
+      // Transform form data to match backend schema
+      const examData = {
+        title: formData.title,
+        description: formData.description,
+        instructions: formData.instructions,
+        duration_minutes: parseInt(formData.duration),
+        total_marks: parseInt(formData.total_marks),
+        passing_marks: parseInt(formData.passing_marks)
+      }
+      
+      const response = await adminAPI.createExam(examData)
       
       setSuccess(true)
       alert(MESSAGES.EXAM_CREATE_SUCCESS)

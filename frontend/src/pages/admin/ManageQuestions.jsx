@@ -29,8 +29,10 @@ const ManageQuestions = () => {
       setLoading(true)
       setError(null)
       const response = await adminAPI.getExamQuestions(examId)
-      setExam(response.data.exam)
-      setQuestions(response.data.questions)
+      // Backend returns just the questions list, not wrapped in exam/questions object
+      setQuestions(response.data)
+      // Set a basic exam object with just the ID for navigation
+      setExam({ id: parseInt(examId), title: 'Exam' })
     } catch (err) {
       setError(handleError(err))
     } finally {
@@ -41,7 +43,9 @@ const ManageQuestions = () => {
   const handleAddQuestion = async (formData) => {
     try {
       setAddingQuestion(true)
-      const response = await adminAPI.addQuestion(examId, formData)
+      // Include exam_id in the form data
+      const questionData = { ...formData, exam_id: parseInt(examId) }
+      const response = await adminAPI.addQuestion(questionData)
       setQuestions([...questions, response.data])
       alert(MESSAGES.QUESTION_ADD_SUCCESS)
     } catch (err) {

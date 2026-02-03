@@ -1,48 +1,32 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Award, CheckCircle, XCircle, AlertTriangle, Trophy } from 'lucide-react'
-import { studentAPI } from '../../services/api'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Award, CheckCircle, XCircle, AlertTriangle, Trophy, User } from 'lucide-react'
+import { adminAPI } from '../../services/api'
 import Button from '../../components/common/Button'
 import Card from '../../components/common/Card'
 import Loader from '../../components/common/Loader'
 import { handleError } from '../../utils/helpers'
 
-const ExamResult = () => {
-  const { attemptId: paramAttemptId } = useParams()
-  const { search } = useLocation()
+const AdminResultDetail = () => {
+  const { attemptId } = useParams()
   const navigate = useNavigate()
-
-  // Get attemptId from params or query string
-  const queryParams = new URLSearchParams(search)
-  const attemptId = paramAttemptId || queryParams.get('attemptId')
 
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  console.log('ExamResult component mounted, attemptId:', attemptId, 'paramAttemptId:', paramAttemptId)
-
   useEffect(() => {
-    console.log('useEffect triggered with attemptId:', attemptId)
     if (attemptId) {
       fetchResult()
-    } else {
-      console.error('No attemptId provided')
-      setError('Invalid attempt ID')
-      setLoading(false)
     }
   }, [attemptId])
 
   const fetchResult = async () => {
     try {
       setLoading(true)
-      setError(null)
-      console.log('Fetching result for attempt:', attemptId)
-      const response = await studentAPI.getResult(attemptId)
-      console.log('Result API response:', response.data)
+      const response = await adminAPI.getResultDetails(attemptId)
       setResult(response.data)
     } catch (err) {
-      console.error('Error fetching result:', err)
       setError(handleError(err))
     } finally {
       setLoading(false)
@@ -65,19 +49,29 @@ const ExamResult = () => {
             <AlertTriangle size={64} className="mx-auto text-red-500 mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Result</h3>
             <p className="text-gray-600 mb-6">{error || 'Unable to load result'}</p>
-            <Button onClick={() => navigate('/student')}>Back to Dashboard</Button>
+            <Button onClick={() => navigate('/admin/view-results')}>Back to Results</Button>
           </div>
         </Card>
       </div>
     )
   }
 
-  const percentage = result.percentage
+  const percentage = result.percentage || 0
   const passingPercentage = 40 // Default passing percentage
   const isPassed = result.passed
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Student Result Details</h1>
+          <p className="text-gray-600">Viewing detailed results for student</p>
+        </div>
+        <Button variant="outline" onClick={() => navigate('/admin/view-results')}>
+          Back to Results
+        </Button>
+      </div>
+
       <Card className={`mb-6 ${isPassed ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-red-500'}`}>
         <div className="text-center py-8">
           {isPassed ? (
@@ -86,9 +80,14 @@ const ExamResult = () => {
             <XCircle size={80} className="mx-auto text-red-500 mb-4" />
           )}
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            {isPassed ? 'Congratulations!' : 'Better Luck Next Time'}
+            {isPassed ? 'Passed' : 'Failed'}
           </h1>
           <p className="text-xl text-gray-600 mb-8">{result.exam_title}</p>
+          
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <User size={24} className="text-gray-600" />
+            <span className="text-lg text-gray-800 font-medium">{result.user_name}</span>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <div className="p-6 bg-blue-50 rounded-xl">
@@ -133,7 +132,7 @@ const ExamResult = () => {
       <Card>
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Question-wise Analysis</h2>
         <div className="space-y-4">
-          {result.questions.map((question, index) => {
+          {result.questions && result.questions.map((question, index) => {
             const isCorrect = question.selected_answer === question.correct_answer
             
             return (
@@ -211,14 +210,8 @@ const ExamResult = () => {
           })}
         </div>
       </Card>
-
-      <div className="mt-6 flex justify-center">
-        <Button onClick={() => navigate('/student')}>
-          Back to Dashboard
-        </Button>
-      </div>
     </div>
   )
 }
 
-export default ExamResult
+export default AdminResultDetail

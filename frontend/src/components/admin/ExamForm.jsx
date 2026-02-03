@@ -8,7 +8,7 @@ const ExamForm = ({ initialData = null, onSubmit, onCancel, loading = false }) =
     title: initialData?.title || '',
     description: initialData?.description || '',
     instructions: initialData?.instructions || '',
-    duration: initialData?.duration || '',
+    duration: initialData?.duration_minutes || initialData?.duration || '',
     total_marks: initialData?.total_marks || '',
     passing_marks: initialData?.passing_marks || ''
   })

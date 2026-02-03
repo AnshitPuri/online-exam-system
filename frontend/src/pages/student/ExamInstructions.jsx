@@ -23,13 +23,14 @@ const ExamInstructions = () => {
   const fetchExamDetails = async () => {
     try {
       setLoading(true)
+      setError(null)
+      console.log('Fetching exam details for examId:', examId)
       const response = await studentAPI.getExamDetails(examId)
-      setExam(response.data.exam)
-      
-      if (response.data.attempt) {
-        navigate(`/student/exam/${examId}/start`, { replace: true })
-      }
+      console.log('Exam response:', response.data)
+      // Backend returns exam object directly, not wrapped in {exam: ...}
+      setExam(response.data)
     } catch (err) {
+      console.error('Error fetching exam:', err)
       setError(handleError(err))
     } finally {
       setLoading(false)
@@ -43,12 +44,17 @@ const ExamInstructions = () => {
     }
 
     setStarting(true)
+    console.log('Starting exam for examId:', examId)
     try {
+      console.log('Calling startExam API...')
       const response = await studentAPI.startExam(examId)
-      if (response.data.attempt) {
+      console.log('Start exam response:', response.data)
+      if (response.data) {
+        console.log('Navigating to exam interface...')
         navigate(`/student/exam/${examId}/start`)
       }
     } catch (err) {
+      console.error('Start exam error:', err)
       alert(handleError(err))
       setStarting(false)
     }
@@ -106,7 +112,7 @@ const ExamInstructions = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Duration</p>
-                <p className="text-xl font-bold text-gray-900">{exam.duration} mins</p>
+                <p className="text-xl font-bold text-gray-900">{exam.duration_minutes} mins</p>
               </div>
             </div>
 

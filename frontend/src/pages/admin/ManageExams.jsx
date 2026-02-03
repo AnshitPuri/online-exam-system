@@ -33,9 +33,13 @@ const ManageExams = () => {
     }
   }
 
-  const handleToggleStatus = async (examId) => {
+  const handleToggleStatus = async (examId, isPublished) => {
     try {
-      await adminAPI.toggleExamStatus(examId)
+      if (isPublished) {
+        await adminAPI.unpublishExam(examId)
+      } else {
+        await adminAPI.publishExam(examId)
+      }
       setExams(exams.map(exam => 
         exam.id === examId 
           ? { ...exam, is_published: !exam.is_published }
@@ -119,13 +123,13 @@ const ManageExams = () => {
                   <p className="text-gray-600 mb-4">{exam.description}</p>
                   
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span>Duration: {exam.duration} mins</span>
+                    <span>Duration: {exam.duration_minutes} mins</span>
                     <span>•</span>
                     <span>Total Marks: {exam.total_marks}</span>
                     <span>•</span>
                     <span>Passing Marks: {exam.passing_marks}</span>
                     <span>•</span>
-                    <span>Questions: {exam.questions_count || 0}</span>
+                    <span>Questions: {exam.question_count || 0}</span>
                   </div>
                 </div>
 
@@ -134,7 +138,7 @@ const ManageExams = () => {
                     size="sm"
                     variant={exam.is_published ? 'secondary' : 'success'}
                     icon={exam.is_published ? EyeOff : Eye}
-                    onClick={() => handleToggleStatus(exam.id)}
+                    onClick={() => handleToggleStatus(exam.id, exam.is_published)}
                   >
                     {exam.is_published ? 'Unpublish' : 'Publish'}
                   </Button>

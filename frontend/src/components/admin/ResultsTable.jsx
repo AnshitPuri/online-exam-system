@@ -7,7 +7,7 @@ const ResultsTable = ({ results }) => {
   const navigate = useNavigate()
 
   const handleViewDetails = (result) => {
-    navigate(`/student/exam/${result.exam_id}/result?attemptId=${result.id}`)
+    navigate(`/admin/results/${result.id}`)
   }
 
   if (results.length === 0) {
@@ -52,9 +52,8 @@ const ResultsTable = ({ results }) => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {results.map((result) => {
-            const percentage = calculatePercentage(result.marks_obtained, result.exam.total_marks)
-            const passingPercentage = (result.exam.passing_marks / result.exam.total_marks) * 100
-            const status = percentage >= passingPercentage ? 'pass' : 'fail'
+            const percentage = result.percentage || 0
+            const status = result.passed ? 'pass' : 'fail'
             
             return (
               <tr key={result.id} className="hover:bg-gray-50">
@@ -62,27 +61,26 @@ const ResultsTable = ({ results }) => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
                       <span className="text-primary-700 font-medium">
-                        {result.student.name.charAt(0).toUpperCase()}
+                        {(result.student_name || 'S').charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{result.student.name}</div>
-                      <div className="text-sm text-gray-500">{result.student.email}</div>
+                      <div className="text-sm font-medium text-gray-900">{result.student_name}</div>
+                      <div className="text-sm text-gray-500">{result.student_email}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{result.exam.title}</div>
-                  <div className="text-sm text-gray-500">Duration: {result.exam.duration} mins</div>
+                  <div className="text-sm font-medium text-gray-900">{result.exam_title}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {formatDateTime(result.submitted_at)}
+                  {formatDateTime(result.end_time)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <div className="flex items-center justify-center gap-1">
                     <Award size={16} className="text-primary-600" />
                     <span className="text-sm font-medium text-gray-900">
-                      {result.marks_obtained}/{result.exam.total_marks}
+                      {result.score}/{result.total_marks}
                     </span>
                   </div>
                 </td>

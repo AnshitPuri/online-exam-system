@@ -11,9 +11,11 @@ export const useExam = (examId) => {
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
+  const [starting, setStarting] = useState(false)
+
   useEffect(() => {
-    if (examId) {
-      fetchExamDetails()
+    if (examId && !starting && !currentAttempt) {
+      startExam()
     }
   }, [examId])
 
@@ -21,19 +23,10 @@ export const useExam = (examId) => {
     try {
       setLoading(true)
       setError(null)
+      // Backend returns exam object directly, not wrapped in {exam: ...}
       const response = await studentAPI.getExamDetails(examId)
-      setExam(response.data.exam)
-      if (response.data.attempt) {
-        setCurrentAttempt(response.data.attempt)
-        setQuestions(response.data.questions || [])
-        const savedAnswers = {}
-        if (response.data.attempt.answers) {
-          response.data.attempt.answers.forEach(ans => {
-            savedAnswers[ans.question_id] = ans.selected_option
-          })
-        }
-        setAnswers(savedAnswers)
-      }
+      setExam(response.data)
+      // getExamDetails doesn't return attempt - students need to start exam first
     } catch (err) {
       setError(handleError(err))
     } finally {
@@ -42,19 +35,30 @@ export const useExam = (examId) => {
   }
 
   const startExam = async () => {
+    // Prevent concurrent calls
+    if (starting) return { success: false, error: 'Already starting exam' }
+    
     try {
+      setStarting(true)
       setLoading(true)
       setError(null)
       const response = await studentAPI.startExam(examId)
-      setCurrentAttempt(response.data.attempt)
-      setQuestions(response.data.questions)
+      // Backend returns AttemptResponse with exam info and questions
+      setExam({
+        id: response.data.exam_id,
+        title: response.data.exam_title,
+        duration_minutes: response.data.duration_minutes
+      })
+      setCurrentAttempt(response.data)
+      setQuestions(response.data.questions || [])
       setAnswers({})
-      return { success: true, attempt: response.data.attempt }
+      return { success: true, attempt: response.data }
     } catch (err) {
       const errorMsg = handleError(err)
       setError(errorMsg)
       return { success: false, error: errorMsg }
     } finally {
+      setStarting(false)
       setLoading(false)
     }
   }
@@ -67,7 +71,7 @@ export const useExam = (examId) => {
       
       await studentAPI.saveAnswer(currentAttempt.id, {
         question_id: questionId,
-        selected_option: selectedOption
+        selected_answer: selectedOption
       })
       
       return { success: true }

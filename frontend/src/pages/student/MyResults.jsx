@@ -18,9 +18,12 @@ const MyResults = () => {
     try {
       setLoading(true)
       setError(null)
+      console.log('Fetching my results...')
       const response = await studentAPI.getMyResults()
+      console.log('MyResults API response:', response.data)
       setResults(response.data)
     } catch (err) {
+      console.error('Error fetching results:', err)
       setError(handleError(err))
     } finally {
       setLoading(false)

@@ -27,7 +27,7 @@ const ExamInterface = () => {
   }
 
   const { timeLeft, start } = useTimer(
-    exam ? exam.duration * 60 : 0,
+    exam ? exam.duration_minutes * 60 : 0,
     handleTimeUp
   )
 
