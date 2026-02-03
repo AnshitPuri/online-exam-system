@@ -9,6 +9,7 @@ const ResultCard = ({ result }) => {
   
   const percentage = result.percentage || 0
   const isPassed = result.passed
+  const tabSwitches = result.tab_switches || 0
 
   const handleViewDetails = () => {
     navigate(`/student/results/${result.id}`)
@@ -63,10 +64,14 @@ const ResultCard = ({ result }) => {
           </div>
         </div>
 
-        <div className="pt-3 border-t border-gray-200">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-medium ${tabSwitches > 2 ? 'text-red-600' : 'text-gray-600'}`}>
+              Tab Switches: {tabSwitches}
+            </span>
+          </div>
           <Button 
             variant="outline" 
-            fullWidth 
             onClick={handleViewDetails}
           >
             View Detailed Result

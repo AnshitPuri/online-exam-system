@@ -7,12 +7,20 @@ const ExamCard = ({ exam }) => {
   const navigate = useNavigate()
 
   const handleStartExam = () => {
+    console.log('Starting exam:', exam.id)
     navigate(`/student/exam/${exam.id}/instructions`)
   }
 
   const handleViewResult = () => {
+    console.log('View Result clicked, exam:', exam)
+    console.log('attempt_id:', exam.attempt_id)
+    console.log('has_attempted:', exam.has_attempted)
     if (exam.attempt_id) {
-      navigate(`/student/exam/${exam.id}/result?attemptId=${exam.attempt_id}`)
+      const url = `/student/exam/${exam.id}/result?attemptId=${exam.attempt_id}`
+      console.log('Navigating to:', url)
+      navigate(url)
+    } else {
+      console.error('No attempt_id found!')
     }
   }
 
