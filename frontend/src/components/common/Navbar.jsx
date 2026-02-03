@@ -15,6 +15,10 @@ const Navbar = () => {
     navigate('/login')
   }
 
+  const navigateToProfile = () => {
+    navigate(user.role === 'admin' ? '/admin/profile' : '/student/profile')
+  }
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,13 +36,18 @@ const Navbar = () => {
             <>
               <div className="hidden md:flex items-center space-x-4">
                 <div className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">{getInitials(user.name)}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-900">{user.name}</span>
-                    <span className="text-xs text-gray-500 capitalize">{user.role}</span>
-                  </div>
+                  <button
+                    onClick={navigateToProfile}
+                    className="flex items-center space-x-3 hover:bg-gray-100 rounded-lg p-1 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">{getInitials(user.name)}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                      <span className="text-xs text-gray-500 capitalize">{user.role}</span>
+                    </div>
+                  </button>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -65,6 +74,13 @@ const Navbar = () => {
       {user && mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-4 py-3 space-y-3">
+            <button
+              onClick={navigateToProfile}
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <User size={18} />
+              <span>Profile</span>
+            </button>
             <div className="flex items-center space-x-3 pb-3 border-b border-gray-200">
               <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium">{getInitials(user.name)}</span>

@@ -34,7 +34,9 @@ const ManageStudents = () => {
       setLoading(true)
       setError(null)
       const response = await adminAPI.getAllStudents()
-      setStudents(response.data)
+      // Filter out admin users from the list
+      const studentsOnly = response.data.filter(user => user.role !== 'admin')
+      setStudents(studentsOnly)
     } catch (err) {
       setError(handleError(err))
     } finally {

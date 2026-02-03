@@ -10,7 +10,9 @@ import Register from './pages/Register'
 
 // Student Pages
 import StudentLayout from './layouts/StudentLayout'
+import StudentProfileLayout from './layouts/StudentProfileLayout'
 import StudentDashboard from './pages/student/StudentDashboard'
+import StudentProfile from './pages/student/StudentProfile'
 import ExamInstructions from './pages/student/ExamInstructions'
 import ExamInterface from './pages/student/ExamInterface'
 import ExamResult from './pages/student/ExamResult'
@@ -18,7 +20,9 @@ import MyResults from './pages/student/MyResults'
 
 // Admin Pages
 import AdminLayout from './layouts/AdminLayout'
+import AdminProfileLayout from './layouts/AdminProfileLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProfile from './pages/admin/AdminProfile'
 import CreateExam from './pages/admin/CreateExam'
 import ManageExams from './pages/admin/ManageExams'
 import ManageQuestions from './pages/admin/ManageQuestions'
@@ -58,6 +62,15 @@ function App() {
         <Route path="results" element={<MyResults />} />
       </Route>
 
+      {/* Student Profile Route (No Footer) */}
+      <Route path="/student/profile" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <StudentProfileLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<StudentProfile />} />
+      </Route>
+
       {/* Admin Routes */}
       <Route path="/admin" element={
         <ProtectedRoute allowedRoles={['admin']}>
@@ -71,6 +84,15 @@ function App() {
         <Route path="view-results" element={<ViewResults />} />
         <Route path="results/:attemptId" element={<ResultDetail />} />
         <Route path="manage-students" element={<ManageStudents />} />
+      </Route>
+
+      {/* Admin Profile Route (No Footer) */}
+      <Route path="/admin/profile" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminProfileLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<AdminProfile />} />
       </Route>
 
       {/* 404 Route */}
