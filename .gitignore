@@ -22,6 +22,7 @@ wheels/
 .venv
 env/
 scripts/
+venv/
 ENV/
 env.bak/
 venv.bak/
