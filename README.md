@@ -100,7 +100,8 @@ This system addresses the above challenges by providing:
 | **Python 3.11** | Programming language |
 | **FastAPI** | Modern, fast web framework |
 | **SQLAlchemy** | ORM for database operations |
-| **PostgreSQL** | Relational database |
+| **MySQL** | Relational database |
+| **PyMySQL** | MySQL database driver |
 | **Pydantic** | Data validation |
 | **JWT** | Authentication tokens |
 | **Uvicorn** | ASGI server |
@@ -140,7 +141,7 @@ This system addresses the above challenges by providing:
 ┌─────────────────────────────────────────────────────────────┐
 │                     Data Layer (Database)                    │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │                    PostgreSQL Database                    ││
+│  │                    MySQL Database                          ││
 │  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       ││
 │  │  │  Users  │ │  Exams  │ │Questions│ │ Results │       ││
 │  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘       ││
@@ -268,7 +269,7 @@ This system addresses the above challenges by providing:
 |------|-----------------|
 | Node.js | v16 or higher |
 | Python | 3.11 or higher |
-| PostgreSQL | 13 or higher |
+| MySQL | 8.0 or higher |
 | npm | 8 or higher |
 
 ### Backend Setup
@@ -492,17 +493,6 @@ online-exam-system/
 ## 📄 License
 
 This project is licensed under the MIT License.
-
----
-
-## 🙏 Acknowledgments
-
-- **React Team** - For the amazing React framework
-- **FastAPI Team** - For the modern Python web framework
-- **Tailwind CSS** - For the utility-first CSS framework
-- **PostgreSQL Team** - For the robust database system
-- **Vite** - For the lightning-fast build tool
-- **Lucide** - For the beautiful icons
 
 ---
 
