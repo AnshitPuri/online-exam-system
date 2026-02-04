@@ -1,50 +1,324 @@
-# Online Examination System - Frontend
+# Online Examination System
 
-A modern, secure, and efficient React-based frontend for conducting online examinations with real-time monitoring and instant results.
+A modern, secure, and efficient full-stack online examination platform built with React (frontend) and FastAPI (backend) for conducting assessments with real-time monitoring and instant results.
 
-## 🚀 Features
+---
 
-### Student Features
-- **User Authentication**: Secure login and registration
-- **Exam Dashboard**: View available published exams
-- **Exam Instructions**: Clear instructions before starting
-- **Live Exam Interface**: 
-  - Real-time countdown timer
-  - Question navigation
-  - Auto-save answers
-  - Tab switch detection and warning
-  - Auto-submit on time expiry
-- **Instant Results**: Detailed result analysis with correct answers
-- **Results History**: View all past exam attempts
+## 📋 Table of Contents
 
-### Admin Features
-- **Dashboard**: Overview statistics and recent submissions
-- **Exam Management**: Create, edit, publish/unpublish exams
-- **Question Bank**: Add, edit, and delete questions
-- **Student Management**: View and manage student accounts
-- **Results Analysis**: View and filter all exam results
-- **Real-time Monitoring**: Track exam attempts and performance
+1. [Project Overview](#project-overview)
+2. [Features](#features)
+3. [Technology Stack](#technology-stack)
+4. [Architecture](#architecture)
+5. [Database Design](#database-design)
+6. [API Endpoints](#api-endpoints)
+7. [Installation Guide](#installation-guide)
+8. [Project Structure](#project-structure)
+9. [Key Features Implementation](#key-features-implementation)
+10. [Security Features](#security-features)
+11. [Use Cases](#use-cases)
+12. [Future Enhancements](#future-enhancements)
+13. [Contributors](#contributors)
+14. [License](#license)
 
-## 🛠️ Tech Stack
+---
 
-- **Framework**: React 18 with Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Context API
-- **Routing**: React Router v6
-- **HTTP Client**: Axios
-- **Icons**: Lucide React
+## 📖 Project Overview
 
-## 📋 Prerequisites
+The Online Examination System is a comprehensive web-based platform designed to streamline the process of conducting online examinations. It provides separate interfaces for administrators and students, enabling seamless exam management, real-time monitoring, and instant result analysis.
 
-- Node.js (v16 or higher)
-- npm or yarn
-- Backend API running on `http://localhost:8000`
+### Problem Statement
 
-## 🔧 Installation
+Traditional pen-and-paper examinations face challenges such as:
+- Manual grading and result processing
+- Time-consuming result declaration
+- Difficulty in maintaining exam records
+- Limited accessibility for remote students
+- Higher probability of human errors
 
-1. **Clone the repository**
+### Solution
+
+This system addresses the above challenges by providing:
+- Automated grading and instant results
+- Digital record keeping
+- Remote examination capability
+- Real-time monitoring and analytics
+- Enhanced security features
+
+---
+
+## ✨ Features
+
+### 👨‍🎓 Student Features
+
+| Feature | Description |
+|---------|-------------|
+| **User Authentication** | Secure login and registration with JWT tokens |
+| **Exam Dashboard** | View all available published exams with details |
+| **Exam Instructions** | Clear guidelines before starting the exam |
+| **Live Exam Interface** | Real-time exam taking experience with timer |
+| **Question Navigation** | Jump between questions easily |
+| **Auto-Save Answers** | Automatic saving of selected answers |
+| **Tab Switch Detection** | Monitors and warns about tab switches |
+| **Auto-Submit** | Automatic submission on timer expiry |
+| **Instant Results** | Detailed result analysis with correct answers |
+| **Results History** | View all past exam attempts and performance |
+
+### 👨‍💼 Admin Features
+
+| Feature | Description |
+|---------|-------------|
+| **Dashboard** | Overview statistics and recent submissions |
+| **Exam Management** | Create, edit, publish/unpublish exams |
+| **Question Bank** | Add, edit, and delete questions with multiple formats |
+| **Student Management** | View and manage student accounts |
+| **Results Analysis** | View, filter, and export exam results |
+| **Real-time Monitoring** | Track exam attempts and student performance |
+| **CSV Export** | Export results to CSV for external analysis |
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+| Technology | Purpose |
+|------------|---------|
+| **React 18** | UI framework with modern hooks |
+| **Vite** | Build tool for fast development |
+| **Tailwind CSS** | Utility-first CSS framework |
+| **React Router v6** | Client-side routing |
+| **Context API** | Global state management |
+| **Axios** | HTTP client for API calls |
+| **Lucide React** | Icon library |
+| **ESLint** | Code linting and quality |
+
+### Backend
+
+| Technology | Purpose |
+|------------|---------|
+| **Python 3.11** | Programming language |
+| **FastAPI** | Modern, fast web framework |
+| **SQLAlchemy** | ORM for database operations |
+| **PostgreSQL** | Relational database |
+| **Pydantic** | Data validation |
+| **JWT** | Authentication tokens |
+| **Uvicorn** | ASGI server |
+| **Python-multipart** | File upload support |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Client Layer (Frontend)                  │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                  React Application                       ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   ││
+│  │  │  Auth    │ │  Exam     │ │ Results  │ │  Admin   │   ││
+│  │  │ Context  │ │  Module   │ │  Module  │ │  Module  │   ││
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS/REST API
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Server Layer (Backend)                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                     FastAPI Server                       ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   ││
+│  │  │  Auth    │ │  Exams   │ │Questions │ │ Results  │   ││
+│  │  │  Routes  │ │  Routes  │ │  Routes  │ │  Routes  │   ││
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ SQLAlchemy ORM
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Data Layer (Database)                    │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                    PostgreSQL Database                    ││
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       ││
+│  │  │  Users  │ │  Exams  │ │Questions│ │ Results │       ││
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘       ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🗄️ Database Design
+
+### Users Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | Integer | Primary key |
+| email | String(255) | Unique email address |
+| password_hash | String(255) | Hashed password |
+| full_name | String(100) | User's full name |
+| role | Enum | 'student' or 'admin' |
+| created_at | DateTime | Creation timestamp |
+| is_active | Boolean | Account status |
+
+### Exams Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | Integer | Primary key |
+| title | String(255) | Exam title |
+| description | Text | Exam description |
+| duration_minutes | Integer | Time limit in minutes |
+| passing_score | Integer | Minimum passing percentage |
+| is_published | Boolean | Exam visibility status |
+| created_by | Integer | Admin ID reference |
+| created_at | DateTime | Creation timestamp |
+| start_date | DateTime | Exam start availability |
+| end_date | DateTime | Exam end availability |
+
+### Questions Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | Integer | Primary key |
+| exam_id | Integer | Foreign key to exams |
+| question_text | Text | Question content |
+| question_type | Enum | 'multiple_choice', 'true_false' |
+| options | JSON | Array of options with correct answer |
+| points | Integer | Marks for the question |
+| created_at | DateTime | Creation timestamp |
+
+### ExamAttempts Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | Integer | Primary key |
+| exam_id | Integer | Foreign key to exams |
+| user_id | Integer | Foreign key to users |
+| score | Integer | Obtained score |
+| total_questions | Integer | Total questions in exam |
+| correct_answers | Integer | Number of correct answers |
+| started_at | DateTime | Exam start time |
+| submitted_at | DateTime | Submission timestamp |
+| status | Enum | 'in_progress', 'completed', 'abandoned' |
+
+### Answers Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | Integer | Primary key |
+| attempt_id | Integer | Foreign key to exam attempts |
+| question_id | Integer | Foreign key to questions |
+| selected_option | Integer | Index of selected option |
+| is_correct | Boolean | Whether answer is correct |
+| created_at | DateTime | Timestamp |
+
+---
+
+## 📡 API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | User login |
+| POST | `/api/auth/logout` | User logout |
+| GET | `/api/auth/me` | Get current user |
+
+### Exams
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/exams` | Get all published exams |
+| GET | `/api/exams/{id}` | Get exam details |
+| POST | `/api/exams` | Create new exam |
+| PUT | `/api/exams/{id}` | Update exam |
+| DELETE | `/api/exams/{id}` | Delete exam |
+| POST | `/api/exams/{id}/publish` | Publish exam |
+
+### Questions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/questions?exam_id={id}` | Get questions for exam |
+| POST | `/api/questions` | Add new question |
+| PUT | `/api/questions/{id}` | Update question |
+| DELETE | `/api/questions/{id}` | Delete question |
+
+### Student Exams
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/student/exams` | Get available exams |
+| POST | `/api/student/exams/{id}/start` | Start exam attempt |
+| POST | `/api/student/attempts/{id}/save` | Save answer |
+| POST | `/api/student/attempts/{id}/submit` | Submit exam |
+| GET | `/api/student/attempts/{id}` | Get attempt details |
+
+### Results
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/results` | Get all results (admin) |
+| GET | `/api/results/{id}` | Get specific result |
+| GET | `/api/student/results` | Get student results |
+| GET | `/api/results/export/csv` | Export results to CSV |
+
+---
+
+## 📦 Installation Guide
+
+### Prerequisites
+
+| Tool | Minimum Version |
+|------|-----------------|
+| Node.js | v16 or higher |
+| Python | 3.11 or higher |
+| PostgreSQL | 13 or higher |
+| npm | 8 or higher |
+
+### Backend Setup
+
+1. **Navigate to backend directory**
    ```bash
-   git clone <repository-url>
+   cd backend
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   source venv/bin/activate  # Linux/Mac
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` file:
+   ```env
+   DATABASE_URL=postgresql://user:password@localhost:5432/exam_db
+   SECRET_KEY=your-secret-key
+   ALGORITHM=HS256
+   ACCESS_TOKEN_EXPIRE_MINUTES=30
+   ```
+
+5. **Initialize database**
+   ```bash
+   python -m app.core.database
+   ```
+
+6. **Start backend server**
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+   Server runs at `http://localhost:8000`
+
+### Frontend Setup
+
+1. **Navigate to frontend directory**
+   ```bash
    cd frontend
    ```
 
@@ -58,8 +332,8 @@ A modern, secure, and efficient React-based frontend for conducting online exami
    cp .env.example .env
    ```
    
-   Edit `.env` and set your API base URL:
-   ```
+   Edit `.env` file:
+   ```env
    VITE_API_BASE_URL=http://localhost:8000/api
    ```
 
@@ -68,60 +342,79 @@ A modern, secure, and efficient React-based frontend for conducting online exami
    npm run dev
    ```
 
-   The application will be available at `http://localhost:3000`
+   Application runs at `http://localhost:3000`
 
-## 📦 Build for Production
+---
 
-```bash
-npm run build
-```
-
-The production-ready files will be in the `dist` directory.
-
-## 🏗️ Project Structure
+## 📂 Project Structure
 
 ```
-frontend/
-├── public/              # Static assets
-├── src/
-│   ├── assets/         # Images, fonts, etc.
-│   ├── components/     # Reusable components
-│   │   ├── common/     # Shared UI components
-│   │   ├── student/    # Student-specific components
-│   │   └── admin/      # Admin-specific components
-│   ├── pages/          # Page components
-│   │   ├── student/    # Student pages
-│   │   └── admin/      # Admin pages
-│   ├── context/        # React Context providers
-│   ├── hooks/          # Custom React hooks
-│   ├── layouts/        # Layout components
-│   ├── services/       # API service layer
-│   ├── utils/          # Utility functions and helpers
-│   ├── App.jsx         # Main app component
-│   ├── main.jsx        # Application entry point
-│   └── index.css       # Global styles
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-└── README.md
+online-exam-system/
+├── backend/
+│   ├── app/
+│   │   ├── core/           # Core configurations
+│   │   │   ├── config.py   # App settings
+│   │   │   ├── security.py # Auth & security
+│   │   │   └── database.py # DB connection
+│   │   ├── models/         # Database models
+│   │   │   ├── user.py
+│   │   │   ├── exam.py
+│   │   │   └── question.py
+│   │   ├── routes/         # API endpoints
+│   │   │   ├── auth.py
+│   │   │   ├── exams.py
+│   │   │   ├── questions.py
+│   │   │   └── results.py
+│   │   ├── services/       # Business logic
+│   │   │   └── csv_service.py
+│   │   └── main.py         # Application entry
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # Reusable components
+│   │   │   ├── common/     # Shared UI components
+│   │   │   ├── student/    # Student components
+│   │   │   └── admin/      # Admin components
+│   │   ├── pages/          # Page components
+│   │   │   ├── student/
+│   │   │   └── admin/
+│   │   ├── context/        # React Context
+│   │   ├── hooks/          # Custom hooks
+│   │   ├── layouts/        # Layout wrappers
+│   │   ├── services/       # API services
+│   │   ├── utils/          # Utilities
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   ├── vite.config.js
+│   └── tailwind.config.js
+│
+├── README.md
+└── .gitignore
 ```
+
+---
 
 ## 🎯 Key Features Implementation
 
-### Authentication
+### Authentication System
 - JWT token-based authentication
+- Password hashing with bcrypt
+- Role-based access control (RBAC)
+- Protected routes with route guards
 - Auto-redirect based on user role
-- Protected routes with role-based access
 
-### Exam Timer
+### Exam Timer System
 - Countdown timer with MM:SS format
 - Visual warnings at 5 minutes and 1 minute
 - Auto-submit when time reaches 0
-- Persistent timer state
+- Persistent timer state across page refreshes
 
 ### Tab Switch Detection
 - Uses `document.visibilitychange` event
-- Tracks and limits tab switches
+- Tracks and limits tab switches (configurable limit)
 - Shows warning modal on detection
 - Auto-submits exam on exceeding limit
 
@@ -129,136 +422,90 @@ frontend/
 - Immediate save on answer selection
 - Visual feedback for saved state
 - Handles network errors gracefully
+- Offline support with sync capability
 
-### Responsive Design
-- Mobile-first approach
-- Works on all screen sizes
-- Optimized for tablets and desktops
+### CSV Export
+- Server-side CSV generation
+- Complete result data export
+- Excel-compatible format
+- Batch processing for large datasets
+
+---
 
 ## 🔐 Security Features
 
-- HTTP-only cookie support
-- CSRF protection
-- XSS prevention
-- Input validation
-- Secure password handling
+| Feature | Implementation |
+|---------|----------------|
+| **Authentication** | JWT tokens with expiration |
+| **Password Security** | Bcrypt hashing (12 rounds) |
+| **Input Validation** | Pydantic models |
+| **SQL Injection** | SQLAlchemy ORM with parameterized queries |
+| **CORS** | Configured allowed origins |
+| **XSS Prevention** | React's automatic escaping |
+| **CSRF Protection** | Same-site cookie attributes |
+| **Rate Limiting** | SlowAPI middleware |
 
-## 🎨 UI Components
+---
 
-### Common Components
-- `Button` - Reusable button with variants
-- `Input` - Form input with validation
-- `Card` - Content container
-- `Modal` - Dialog/confirmation modals
-- `Loader` - Loading spinner
-- `Navbar` - Top navigation
-- `Footer` - Page footer
+## 📊 Use Cases
 
-### Student Components
-- `ExamCard` - Exam information display
-- `ExamTimer` - Live countdown timer
-- `QuestionCard` - Question with options
-- `ResultCard` - Result summary card
+### 1. Educational Institutions
+- Conducting periodic assessments
+- Online quizzes and tests
+- Entrance examinations
+- Certification exams
 
-### Admin Components
-- `ExamForm` - Create/edit exam form
-- `QuestionForm` - Add question form
-- `StudentList` - Student management table
-- `ResultsTable` - Results display table
+### 2. Corporate Training
+- Employee skill assessments
+- Pre-training evaluations
+- Compliance testing
+- Knowledge certification
 
-## 📡 API Integration
+### 3. Competitive Exams
+- Large-scale standardized tests
+- Recruitment assessments
+- Scholarship eligibility tests
 
-All API calls are handled through the `api.js` service layer with:
-- Axios interceptors for auth tokens
-- Centralized error handling
-- Request/response transformation
-- Loading state management
+---
 
-### Available API Services
+## 🚀 Future Enhancements
 
-```javascript
-// Authentication
-authAPI.register(data)
-authAPI.login(data)
-authAPI.logout()
+| Priority | Feature | Description |
+|----------|---------|-------------|
+| High | **Proctoring Integration** | AI-powered live proctoring with webcam |
+| High | **Question Bank** | Randomized question selection from pool |
+| Medium | **Multiple Question Types** | Fill in blanks, matching, essay |
+| Medium | **Analytics Dashboard** | Advanced performance analytics |
+| Medium | **Multi-language Support** | Interface and content translation |
+| Low | **Mobile App** | Native mobile application |
+| Low | **Offline Mode** | PWA with offline capabilities |
+| Low | **Peer Review** | Essay question evaluation by peers |
 
-// Student
-studentAPI.getAvailableExams()
-studentAPI.startExam(examId)
-studentAPI.saveAnswer(attemptId, data)
-studentAPI.submitExam(attemptId)
-studentAPI.getResult(attemptId)
+---
 
-// Admin
-adminAPI.getDashboardStats()
-adminAPI.createExam(data)
-adminAPI.getAllExams()
-adminAPI.addQuestion(examId, data)
-adminAPI.getAllStudents()
-adminAPI.getAllResults()
-```
+## 👥 Contributors
 
-## 🧪 Testing
+- **Anshit Puri** - Project Lead & Developer
 
-```bash
-# Run linter
-npm run lint
-
-# Build and preview
-npm run build
-npm run preview
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **API Connection Error**
-   - Check if backend is running
-   - Verify API base URL in `.env`
-   - Check CORS settings on backend
-
-2. **Build Fails**
-   - Clear `node_modules` and reinstall: `rm -rf node_modules && npm install`
-   - Clear cache: `npm cache clean --force`
-
-3. **Timer Not Working**
-   - Check browser console for errors
-   - Ensure JavaScript is enabled
-
-4. **Tab Switch Not Detected**
-   - Works only in production/real browser tabs
-   - May not work in browser DevTools
+---
 
 ## 📄 License
 
 This project is licensed under the MIT License.
 
-## 👥 Contributors
-
-- Anshit Puri
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-For support, email support@example.com or create an issue in the repository.
+---
 
 ## 🙏 Acknowledgments
 
-- React Team for the amazing framework
-- Tailwind CSS for the utility-first CSS framework
-- Lucide for the beautiful icons
-- Vite for the fast build tool
+- **React Team** - For the amazing React framework
+- **FastAPI Team** - For the modern Python web framework
+- **Tailwind CSS** - For the utility-first CSS framework
+- **PostgreSQL Team** - For the robust database system
+- **Vite** - For the lightning-fast build tool
+- **Lucide** - For the beautiful icons
 
+---
 
+## 📞 Support
 
-
-venv\Scripts\activate
-uvicorn app.main:app
+anshitpuri99@gmail.com
