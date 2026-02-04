@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, BookOpen, FileText, TrendingUp, Plus } from 'lucide-react'
+import { 
+  Users, 
+  BookOpen, 
+  FileText, 
+  TrendingUp, 
+  Plus,
+  ArrowRight,
+  Calendar,
+  CheckCircle,
+  Clock,
+  BarChart3
+} from 'lucide-react'
 import { adminAPI } from '../../services/api'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import Loader from '../../components/common/Loader'
-import { handleError, formatDateTime } from '../../utils/helpers'
+import { handleError, formatDateTime, formatRelativeTime } from '../../utils/helpers'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -42,7 +53,7 @@ const AdminDashboard = () => {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       </div>
@@ -54,172 +65,321 @@ const AdminDashboard = () => {
       icon: Users,
       label: 'Total Students',
       value: stats?.total_students || 0,
+      trend: '+12%',
+      trendUp: true,
       color: 'blue',
+      bgLight: 'bg-blue-50',
+      bgGradient: 'from-blue-500 to-blue-600',
       link: '/admin/manage-students'
     },
     {
       icon: BookOpen,
       label: 'Total Exams',
       value: stats?.total_exams || 0,
+      trend: '+5%',
+      trendUp: true,
       color: 'green',
+      bgLight: 'bg-green-50',
+      bgGradient: 'from-green-500 to-green-600',
       link: '/admin/manage-exams'
     },
     {
       icon: FileText,
       label: 'Total Attempts',
       value: stats?.total_attempts || 0,
+      trend: '+23%',
+      trendUp: true,
       color: 'purple',
+      bgLight: 'bg-purple-50',
+      bgGradient: 'from-purple-500 to-purple-600',
       link: '/admin/view-results'
     },
     {
       icon: TrendingUp,
-      label: 'Avg. Pass Rate',
+      label: 'Pass Rate',
       value: `${stats?.average_pass_rate || 0}%`,
-      color: 'yellow',
+      trend: '+8%',
+      trendUp: true,
+      color: 'sky',
+      bgLight: 'bg-sky-50',
+      bgGradient: 'from-sky-500 to-sky-600',
       link: '/admin/view-results'
     }
   ]
 
-  const colorClasses = {
-    blue: 'from-blue-500 to-blue-700',
-    green: 'from-green-500 to-green-700',
-    purple: 'from-purple-500 to-purple-700',
-    yellow: 'from-yellow-500 to-yellow-700'
-  }
+  const quickActions = [
+    {
+      icon: Plus,
+      label: 'Create New Exam',
+      description: 'Set up a new examination',
+      color: 'primary',
+      link: '/admin/create-exam'
+    },
+    {
+      icon: BookOpen,
+      label: 'Manage Exams',
+      description: 'Edit or delete existing exams',
+      color: 'secondary',
+      link: '/admin/manage-exams'
+    },
+    {
+      icon: BarChart3,
+      label: 'View Results',
+      description: 'Analyze exam performance',
+      color: 'secondary',
+      link: '/admin/view-results'
+    },
+    {
+      icon: Users,
+      label: 'Manage Students',
+      description: 'View and manage students',
+      color: 'secondary',
+      link: '/admin/manage-students'
+    }
+  ]
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
+      {/* Header */}
+      <div className="mb-8 animate-fade-in-down">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">Overview of your examination system</p>
+        <p className="text-gray-600">Welcome back! Here's an overview of your examination system.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((stat, index) => {
           const Icon = stat.icon
           return (
             <div
               key={index}
               onClick={() => navigate(stat.link)}
-              className={`bg-gradient-to-br ${colorClasses[stat.color]} text-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow`}
+              className="group bg-white rounded-2xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-lg hover:border-gray-200 transition-all duration-300 animate-fade-in-up card-animate"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <Icon size={32} className="opacity-80" />
-                <div className="text-right">
-                  <p className="text-3xl font-bold">{stat.value}</p>
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-xl ${stat.bgLight} group-hover:scale-110 transition-transform duration-300`}>
+                  <Icon size={24} className={`text-${stat.color}-600`} />
+                </div>
+                <div className={`flex items-center gap-1 text-sm font-medium ${stat.trendUp ? 'text-green-600' : 'text-red-600'}`}>
+                  <TrendingUp size={14} className={!stat.trendUp ? 'rotate-180' : ''} />
+                  {stat.trend}
                 </div>
               </div>
-              <p className="text-sm opacity-90">{stat.label}</p>
+              <div className="mb-1">
+                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+              </div>
+              <p className="text-sm text-gray-500">{stat.label}</p>
             </div>
           )
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Button
-              variant="primary"
-              fullWidth
-              icon={Plus}
-              onClick={() => navigate('/admin/create-exam')}
-            >
-              Create New Exam
-            </Button>
-            <Button
-              variant="outline"
-              fullWidth
-              icon={BookOpen}
-              onClick={() => navigate('/admin/manage-exams')}
-            >
-              Manage Exams
-            </Button>
-            <Button
-              variant="outline"
-              fullWidth
-              icon={FileText}
-              onClick={() => navigate('/admin/view-results')}
-            >
-              View All Results
-            </Button>
-            <Button
-              variant="outline"
-              fullWidth
-              icon={Users}
-              onClick={() => navigate('/admin/manage-students')}
-            >
-              Manage Students
-            </Button>
-          </div>
-        </Card>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+          <Card className="h-full">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+              <span className="text-sm text-gray-500">Common tasks</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon
+                return (
+                  <button
+                    key={index}
+                    onClick={() => navigate(action.link)}
+                    className={`group flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-sky-200 hover:shadow-md transition-all duration-300 text-left`}
+                  >
+                    <div className={`p-3 rounded-xl ${
+                      action.color === 'primary' 
+                        ? 'bg-gradient-to-br from-sky-500 to-sky-600 text-white' 
+                        : 'bg-white border border-gray-200 text-gray-600 group-hover:border-sky-200'
+                    } group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon size={22} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-sky-600 transition-colors">
+                        {action.label}
+                      </p>
+                      <p className="text-sm text-gray-500">{action.description}</p>
+                    </div>
+                    <ArrowRight size={18} className="text-gray-400 group-hover:text-sky-500 group-hover:translate-x-1 transition-all" />
+                  </button>
+                )
+              })}
+            </div>
+          </Card>
+        </div>
 
-        <Card>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">System Statistics</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">Published Exams</span>
-              <span className="text-2xl font-bold text-primary-600">{stats?.published_exams || 0}</span>
+        {/* System Overview */}
+        <div className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+          <Card className="h-full bg-gradient-to-br from-sky-500 to-sky-600 text-white border-0">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <BarChart3 size={24} />
+              </div>
+              <h2 className="text-xl font-bold">System Overview</h2>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">Unpublished Exams</span>
-              <span className="text-2xl font-bold text-gray-600">{stats?.unpublished_exams || 0}</span>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <CheckCircle size={20} className="text-green-300" />
+                  <span className="text-white/90">Published Exams</span>
+                </div>
+                <span className="text-2xl font-bold">{stats?.published_exams || 0}</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <Clock size={20} className="text-yellow-300" />
+                  <span className="text-white/90">Unpublished</span>
+                </div>
+                <span className="text-2xl font-bold">{stats?.unpublished_exams || 0}</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <Users size={20} className="text-blue-300" />
+                  <span className="text-white/90">Active Students</span>
+                </div>
+                <span className="text-2xl font-bold">{stats?.active_students || 0}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">Active Students</span>
-              <span className="text-2xl font-bold text-green-600">{stats?.active_students || 0}</span>
+
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-white/70">Last updated</span>
+                <span className="text-white/90">Just now</span>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
 
-      <Card>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Exam Submissions</h2>
-        {recentResults.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <FileText size={48} className="mx-auto mb-2 text-gray-400" />
-            <p>No recent submissions</p>
+      {/* Recent Submissions */}
+      <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+        <Card>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-sky-100 rounded-lg">
+                <FileText size={22} className="text-sky-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Recent Submissions</h2>
+                <p className="text-sm text-gray-500">Latest exam attempts</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/admin/view-results')}
+            >
+              View All
+            </Button>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Exam</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Score</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {recentResults.map((result) => {
-                  const percentage = result.percentage || 0
-                  const isPassed = result.passed
-                  
-                  return (
-                    <tr key={result.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{result.student_name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{result.exam_title}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{formatDateTime(result.submitted_at)}</td>
-                      <td className="px-4 py-3 text-sm center font-medium">
-                        {result.score}/{result.total_marks} ({percentage}%)
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          isPassed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {isPassed ? 'Pass' : 'Fail'}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+
+          {recentResults.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="p-4 bg-gray-100 rounded-full inline-flex mb-4">
+                <FileText size={32} className="text-gray-400" />
+              </div>
+              <p className="text-gray-500 mb-4">No recent submissions yet</p>
+              <Button 
+                variant="primary" 
+                size="sm"
+                onClick={() => navigate('/admin/create-exam')}
+              >
+                Create Your First Exam
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-gray-100">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Exam</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Submitted</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Score</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {recentResults.map((result, index) => {
+                    const percentage = result.percentage || 0
+                    const isPassed = result.passed
+                    
+                    return (
+                      <tr 
+                        key={result.id} 
+                        className="hover:bg-sky-50/50 transition-colors animate-fade-in"
+                        style={{ animationDelay: `${700 + index * 50}ms` }}
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-sm font-medium">
+                              {result.student_name?.charAt(0)?.toUpperCase() || 'S'}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{result.student_name}</p>
+                              <p className="text-xs text-gray-500">{result.student_email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <p className="font-medium text-gray-900">{result.exam_title}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Calendar size={14} />
+                            <span>{formatDateTime(result.submitted_at)}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <div className="inline-flex items-center gap-2">
+                            <div className={`w-16 h-2 rounded-full bg-gray-200 overflow-hidden`}>
+                              <div 
+                                className={`h-full rounded-full ${percentage >= 60 ? 'bg-green-500' : 'bg-red-500'}`}
+                                style={{ width: `${Math.min(percentage, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">
+                              {result.score}/{result.total_marks}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full ${
+                            isPassed 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {isPassed ? (
+                              <>
+                                <CheckCircle size={12} />
+                                Pass
+                              </>
+                            ) : (
+                              <>
+                                <Clock size={12} />
+                                Fail
+                              </>
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   )
 }

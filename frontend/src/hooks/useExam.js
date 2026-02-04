@@ -86,9 +86,8 @@ export const useExam = (examId) => {
 
     try {
       setSubmitting(true)
-      const response = await studentAPI.submitExam(currentAttempt.id, {
-        tab_switches: tabSwitches
-      })
+      // tab_switches are recorded separately via recordTabSwitch API
+      const response = await studentAPI.submitExam(currentAttempt.id)
       return { success: true, result: response.data }
     } catch (err) {
       const errorMsg = handleError(err)

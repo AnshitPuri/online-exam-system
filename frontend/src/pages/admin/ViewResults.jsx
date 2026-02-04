@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Download } from 'lucide-react'
 import { adminAPI } from '../../services/api'
 import ResultsTable from '../../components/admin/ResultsTable'
 import Button from '../../components/common/Button'
@@ -16,6 +16,7 @@ const ViewResults = () => {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedExam, setSelectedExam] = useState('')
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -61,6 +62,38 @@ const ViewResults = () => {
     setSelectedExam('')
   }
 
+  const handleExportCSV = async () => {
+    try {
+      setExporting(true)
+      const examId = selectedExam ? parseInt(selectedExam) : null
+      const response = await adminAPI.exportResults(examId)
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Set filename based on selected exam
+      if (selectedExam) {
+        const selectedExamData = exams.find(e => e.id === parseInt(selectedExam))
+        const filename = selectedExamData 
+          ? `results_${selectedExamData.title.replace(/\s+/g, '_')}.csv`
+          : 'results.csv'
+        link.setAttribute('download', filename)
+      } else {
+        link.setAttribute('download', 'all_results.csv')
+      }
+      
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      alert(handleError(err))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -75,6 +108,30 @@ const ViewResults = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">View Results</h1>
         <p className="text-gray-600">View and analyze exam results</p>
       </div>
+
+      {/* Export Results */}
+      <Card className="mb-6 bg-gray-50 border-2 border-dashed border-gray-300">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Download size={20} className="text-primary-600" />
+              Export Results
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Export exam results to CSV format for analysis
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            onClick={handleExportCSV}
+            disabled={exporting || results.length === 0}
+            className="flex items-center space-x-2"
+          >
+            <Download size={16} />
+            <span>{exporting ? 'Exporting...' : 'Export CSV'}</span>
+          </Button>
+        </div>
+      </Card>
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">

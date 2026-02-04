@@ -83,6 +83,7 @@ export const adminAPI = {
   unpublishExam: (examId) => api.post(`/exams/${examId}/unpublish`),
   getExamQuestions: (examId) => api.get(`/questions/exam/${examId}`),
   addQuestion: (data) => api.post('/questions', data),
+  addMultipleQuestions: (examId, questions) => api.post(`/questions/bulk`, { exam_id: examId, questions }),
   updateQuestion: (questionId, data) => api.patch(`/questions/${questionId}`, data),
   deleteQuestion: (questionId) => api.delete(`/questions/${questionId}`),
   getAllStudents: () => api.get('/users'),
@@ -91,7 +92,31 @@ export const adminAPI = {
   getAllResults: () => api.get('/admin/results/all'),
   getExamResults: (examId) => api.get(`/admin/results/exam/${examId}`),
   getStudentResults: (studentId) => api.get(`/admin/results/student/${studentId}`),
-  getResultDetails: (attemptId) => api.get(`/admin/results/detail/${attemptId}`)
+  getResultDetails: (attemptId) => api.get(`/admin/results/detail/${attemptId}`),
+  exportResults: (examId = null) => {
+    const url = examId ? `/admin/export/results?exam_id=${examId}` : '/admin/export/results'
+    return api.get(url, { responseType: 'blob' })
+  }
+}
+
+// Bulk Operations APIs
+export const bulkAPI = {
+  importStudents: (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/users/import-csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  exportStudents: () => api.get('/users/export-csv', { responseType: 'blob' }),
+  importQuestions: (file, examId) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post(`/questions/import-csv/${examId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  exportQuestions: (examId) => api.get(`/questions/export-csv/${examId}`, { responseType: 'blob' })
 }
 
 export default api

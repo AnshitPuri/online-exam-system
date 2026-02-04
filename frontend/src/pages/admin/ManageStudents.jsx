@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Download } from 'lucide-react'
 import { adminAPI } from '../../services/api'
 import StudentList from '../../components/admin/StudentList'
 import Input from '../../components/common/Input'
@@ -67,6 +67,23 @@ const ManageStudents = () => {
     }
   }
 
+  const handleExportCSV = async () => {
+    try {
+      const response = await adminAPI.exportStudents()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'students.csv')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      alert(handleError(err))
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -81,6 +98,29 @@ const ManageStudents = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Students</h1>
         <p className="text-gray-600">View and manage student accounts</p>
       </div>
+
+      {/* Export Students */}
+      <Card className="mb-6 bg-gray-50 border-2 border-dashed border-gray-300">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Download size={20} className="text-primary-600" />
+              Export Students
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Export all student data to CSV format
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            onClick={handleExportCSV}
+            className="flex items-center space-x-2"
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </Button>
+        </div>
+      </Card>
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
