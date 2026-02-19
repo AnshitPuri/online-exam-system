@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, timedelta
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -261,6 +264,12 @@ async def submit_exam_internal(attempt_id: int, db: Session, current_user: User)
         )
     
     exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
+    if not exam:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Exam not found"
+        )
+    
     answers = db.query(Answer).filter(Answer.exam_attempt_id == attempt_id).all()
     
     total_score = 0
@@ -278,7 +287,7 @@ async def submit_exam_internal(attempt_id: int, db: Session, current_user: User)
     attempt.is_submitted = True
     attempt.score = total_score
     attempt.total_marks = exam.total_marks
-    attempt.percentage = round((total_score / exam.total_marks) * 100, 2)
+    attempt.percentage = round((total_score / exam.total_marks) * 100, 2) if exam.total_marks and exam.total_marks > 0 else 0
     attempt.passed = total_score >= exam.passing_marks
     
     db.commit()
