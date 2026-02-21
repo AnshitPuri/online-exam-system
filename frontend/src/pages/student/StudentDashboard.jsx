@@ -12,7 +12,6 @@ import { handleError } from '../../utils/helpers'
 const StudentDashboard = () => {
   const { user, loading: authLoading } = useAuth()
   const [exams, setExams] = useState([])
-  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -20,7 +19,6 @@ const StudentDashboard = () => {
     // Only fetch when auth is ready and user exists
     if (!authLoading && user) {
       fetchExams()
-      fetchResults()
     }
   }, [authLoading, user])
 
@@ -34,16 +32,6 @@ const StudentDashboard = () => {
       setError(handleError(err))
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchResults = async () => {
-    try {
-      const response = await studentAPI.getMyResults()
-      setResults(response.data || [])
-    } catch (err) {
-      console.error('Failed to fetch results:', err)
-      setResults([])
     }
   }
 
@@ -105,7 +93,7 @@ const StudentDashboard = () => {
               <FileText size={24} className="text-green-600" />
             </div>
             <div>
-              <p className="text-3xl font-bold text-gray-900">{results.length}</p>
+              <p className="text-3xl font-bold text-gray-900">0</p>
               <p className="text-sm text-gray-500">Completed Exams</p>
             </div>
           </div>
@@ -117,11 +105,7 @@ const StudentDashboard = () => {
               <Clock size={24} className="text-purple-600" />
             </div>
             <div>
-              <p className="text-3xl font-bold text-gray-900">
-                {results.length > 0 
-                  ? Math.round(results.reduce((sum, r) => sum + (r.percentage || 0), 0) / results.length)
-                  : 0}%
-              </p>
+              <p className="text-3xl font-bold text-gray-900">0%</p>
               <p className="text-sm text-gray-500">Average Score</p>
             </div>
           </div>
