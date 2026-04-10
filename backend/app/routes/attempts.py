@@ -246,52 +246,82 @@ async def submit_exam(
     return await submit_exam_internal(attempt_id, db, current_user)
 
 async def submit_exam_internal(attempt_id: int, db: Session, current_user: User):
-    attempt = db.query(ExamAttempt).filter(
-        ExamAttempt.id == attempt_id,
-        ExamAttempt.user_id == current_user.id
-    ).first()
-    
-    if not attempt:
+    try:
+        attempt = db.query(ExamAttempt).filter(
+            ExamAttempt.id == attempt_id,
+            ExamAttempt.user_id == current_user.id
+        ).first()
+        
+        if not attempt:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Attempt not found"
+            )
+        
+        if attempt.is_submitted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Exam already submitted"
+            )
+        
+        exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
+        
+        if not exam:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exam not found"
+            )
+        
+        if not exam.total_marks or exam.total_marks <= 0:
+            logger.error(f"Exam {exam.id} has invalid total_marks: {exam.total_marks}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Exam has not been configured properly (total_marks is 0)"
+            )
+        
+        answers = db.query(Answer).filter(Answer.exam_attempt_id == attempt_id).all()
+        
+        if not answers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No answers found for this attempt"
+            )
+        
+        total_score = 0
+        for answer in answers:
+            question = db.query(Question).filter(Question.id == answer.question_id).first()
+            if not question:
+                logger.warning(f"Question {answer.question_id} not found for answer {answer.id}")
+                continue
+            if answer.selected_answer == question.correct_answer:
+                answer.is_correct = True
+                answer.marks_obtained = question.marks
+                total_score += question.marks
+            else:
+                answer.is_correct = False
+                answer.marks_obtained = 0
+        
+        logger.info(f"Calculated score: {total_score}, total_marks: {exam.total_marks}")
+        
+        attempt.end_time = datetime.utcnow()
+        attempt.is_submitted = True
+        attempt.score = total_score
+        attempt.total_marks = exam.total_marks
+        attempt.percentage = round((total_score / exam.total_marks) * 100, 2) if exam.total_marks > 0 else 0
+        attempt.passed = total_score >= exam.passing_marks
+        
+        logger.info(f"Attempt {attempt_id} submitted successfully. Score: {total_score}, Total: {exam.total_marks}")
+        
+        db.commit()
+        db.refresh(attempt)
+        
+    except Exception as e:
+        logger.error(f"Error submitting exam: {str(e)}")
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Attempt not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error submitting exam: {str(e)}"
         )
-    
-    if attempt.is_submitted:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Exam already submitted"
-        )
-    
-    exam = db.query(Exam).filter(Exam.id == attempt.exam_id).first()
-    if not exam:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Exam not found"
-        )
-    
-    answers = db.query(Answer).filter(Answer.exam_attempt_id == attempt_id).all()
-    
-    total_score = 0
-    for answer in answers:
-        question = db.query(Question).filter(Question.id == answer.question_id).first()
-        if answer.selected_answer == question.correct_answer:
-            answer.is_correct = True
-            answer.marks_obtained = question.marks
-            total_score += question.marks
-        else:
-            answer.is_correct = False
-            answer.marks_obtained = 0
-    
-    attempt.end_time = datetime.utcnow()
-    attempt.is_submitted = True
-    attempt.score = total_score
-    attempt.total_marks = exam.total_marks
-    attempt.percentage = round((total_score / exam.total_marks) * 100, 2) if exam.total_marks and exam.total_marks > 0 else 0
-    attempt.passed = total_score >= exam.passing_marks
-    
-    db.commit()
-    db.refresh(attempt)
     
     questions_with_answers = []
     for answer in answers:

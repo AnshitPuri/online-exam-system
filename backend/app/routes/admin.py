@@ -248,6 +248,119 @@ async def get_detailed_result(
         questions=questions_with_answers
     )
 
+@router.get("/analytics")
+async def get_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    exams = db.query(Exam).all()
+    
+    exam_performance = []
+    for exam in exams:
+        attempts = db.query(ExamAttempt).filter(
+            ExamAttempt.exam_id == exam.id,
+            ExamAttempt.is_submitted == True
+        ).all()
+        
+        if not attempts:
+            continue
+            
+        total_score = sum(a.percentage for a in attempts)
+        avg_score = total_score / len(attempts) if attempts else 0
+        pass_count = sum(1 for a in attempts if a.passed)
+        
+        exam_performance.append({
+            "exam_id": exam.id,
+            "exam_title": exam.title,
+            "total_attempts": len(attempts),
+            "average_score": round(avg_score, 1),
+            "pass_count": pass_count,
+            "fail_count": len(attempts) - pass_count,
+            "pass_rate": round((pass_count / len(attempts)) * 100, 1) if attempts else 0
+        })
+    
+    from datetime import timedelta
+    last_7_days_data = []
+    for i in range(6, -1, -1):
+        day = datetime.utcnow() - timedelta(days=i)
+        day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day.replace(hour=23, minute=59, second=59, microsecond=999)
+        
+        count = db.query(ExamAttempt).filter(
+            ExamAttempt.is_submitted == True,
+            ExamAttempt.end_time >= day_start,
+            ExamAttempt.end_time <= day_end
+        ).count()
+        
+        last_7_days_data.append({
+            "date": day.strftime("%Y-%m-%d"),
+            "day": day.strftime("%a"),
+            "attempts": count
+        })
+    
+    top_students = db.query(
+        User.id,
+        User.full_name,
+        func.avg(ExamAttempt.percentage).label("avg_score"),
+        func.count(ExamAttempt.id).label("attempts")
+    ).join(
+        ExamAttempt, ExamAttempt.user_id == User.id
+    ).filter(
+        ExamAttempt.is_submitted == True,
+        User.role == "student"
+    ).group_by(
+        User.id, User.full_name
+    ).order_by(
+        func.avg(ExamAttempt.percentage).desc()
+    ).limit(5).all()
+    
+    top_students_data = [
+        {
+            "student_id": s.id,
+            "student_name": s.full_name,
+            "average_score": round(s.avg_score, 1),
+            "total_attempts": s.attempts
+        }
+        for s in top_students
+    ]
+    
+    score_distribution = {
+        "0-20": 0,
+        "21-40": 0,
+        "41-60": 0,
+        "61-80": 0,
+        "81-100": 0
+    }
+    
+    all_attempts = db.query(ExamAttempt).filter(
+        ExamAttempt.is_submitted == True
+    ).all()
+    
+    for attempt in all_attempts:
+        pct = attempt.percentage or 0
+        if pct <= 20:
+            score_distribution["0-20"] += 1
+        elif pct <= 40:
+            score_distribution["21-40"] += 1
+        elif pct <= 60:
+            score_distribution["41-60"] += 1
+        elif pct <= 80:
+            score_distribution["61-80"] += 1
+        else:
+            score_distribution["81-100"] += 1
+    
+    distribution_data = [
+        {"range": k, "count": v}
+        for k, v in score_distribution.items()
+    ]
+    
+    return {
+        "exam_performance": exam_performance,
+        "last_7_days": last_7_days_data,
+        "top_students": top_students_data,
+        "score_distribution": distribution_data
+    }
+
 @router.get("/export/results")
 async def export_results(
     exam_id: Optional[int] = Query(None, description="Export results for specific exam"),

@@ -69,6 +69,36 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.get("/api/public/stats")
+async def get_public_stats():
+    from app.core.database import SessionLocal
+    from app.models.user import User
+    from app.models.exam import Exam
+    from app.models.exam_attempt import ExamAttempt
+    from app.models.question import Question
+    from sqlalchemy import func
+    
+    db = SessionLocal()
+    try:
+        total_students = db.query(func.count(User.id)).filter(User.role == "student").scalar() or 0
+        total_exams = db.query(func.count(Exam.id)).scalar() or 0
+        total_attempts = db.query(func.count(ExamAttempt.id)).filter(ExamAttempt.is_submitted == True).scalar() or 0
+        total_questions = db.query(func.count(Question.id)).scalar() or 0
+        
+        avg_pass_rate = db.query(func.avg(ExamAttempt.percentage)).filter(
+            ExamAttempt.is_submitted == True
+        ).scalar() or 0
+        
+        return {
+            "total_students": total_students,
+            "total_exams": total_exams,
+            "total_attempts": total_attempts,
+            "total_questions": total_questions,
+            "average_pass_rate": round(avg_pass_rate, 1)
+        }
+    finally:
+        db.close()
+
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(exams.router, prefix="/api/exams", tags=["Exams"])

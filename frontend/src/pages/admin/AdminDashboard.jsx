@@ -10,18 +10,35 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Award
 } from 'lucide-react'
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from 'recharts'
 import { adminAPI } from '../../services/api'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import Loader from '../../components/common/Loader'
 import { handleError, formatDateTime, formatRelativeTime } from '../../utils/helpers'
 
+const COLORS = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6', '#8B5CF6']
+
 const AdminDashboard = () => {
   const navigate = useNavigate()
   const [stats, setStats] = useState(null)
   const [recentResults, setRecentResults] = useState([])
+  const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -32,9 +49,13 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      const response = await adminAPI.getDashboardStats()
-      setStats(response.data.stats)
-      setRecentResults(response.data.recent_results || [])
+      const [dashResponse, analyticsResponse] = await Promise.all([
+        adminAPI.getDashboardStats(),
+        adminAPI.getAnalytics()
+      ])
+      setStats(dashResponse.data.stats)
+      setRecentResults(dashResponse.data.recent_results || [])
+      setAnalytics(analyticsResponse.data)
     } catch (err) {
       setError(handleError(err))
     } finally {
@@ -259,6 +280,162 @@ const AdminDashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Analytics Charts */}
+      {analytics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Attempts Over Time */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+            <Card>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <TrendingUp size={22} className="text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Attempts (Last 7 Days)</h2>
+                  <p className="text-sm text-gray-500">Daily exam submissions</p>
+                </div>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analytics.last_7_days}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="day" stroke="#6B7280" fontSize={12} />
+                    <YAxis stroke="#6B7280" fontSize={12} allowDecimals={false} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Bar dataKey="attempts" fill="#3B82F6" radius={[4, 4, 0, 0]} name="Attempts" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+
+          {/* Score Distribution */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '700ms' }}>
+            <Card>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <BarChart3 size={22} className="text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Score Distribution</h2>
+                  <p className="text-sm text-gray-500">Student performance range</p>
+                </div>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={analytics.score_distribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="count"
+                      nameKey="range"
+                    >
+                      {analytics.score_distribution?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} students`, 'Count']} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+
+          {/* Top Students */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '800ms' }}>
+            <Card>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Award size={22} className="text-yellow-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Top Performers</h2>
+                  <p className="text-sm text-gray-500">Highest average scores</p>
+                </div>
+              </div>
+              {analytics.top_students.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No data available yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {analytics.top_students.map((student, index) => (
+                    <div 
+                      key={student.student_id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                          index === 0 ? 'bg-yellow-500' : 
+                          index === 1 ? 'bg-gray-400' : 
+                          index === 2 ? 'bg-amber-600' : 'bg-gray-300'
+                        }`}>
+                          {index + 1}
+                        </span>
+                        <div>
+                          <p className="font-medium text-gray-900">{student.student_name}</p>
+                          <p className="text-xs text-gray-500">{student.total_attempts} attempts</p>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">{student.average_score}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
+
+          {/* Exam Performance */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+            <Card>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BookOpen size={22} className="text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Exam Performance</h2>
+                  <p className="text-sm text-gray-500">Pass rate by exam</p>
+                </div>
+              </div>
+              {analytics.exam_performance.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No exam data available yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {analytics.exam_performance.slice(0, 5).map((exam) => (
+                    <div key={exam.exam_id} className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium text-gray-900 truncate flex-1 mr-2">{exam.exam_title}</p>
+                        <span className="text-sm font-semibold text-gray-700">{exam.pass_rate}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-green-500 rounded-full"
+                          style={{ width: `${exam.pass_rate}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{exam.total_attempts} attempts</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Recent Submissions */}
       <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>

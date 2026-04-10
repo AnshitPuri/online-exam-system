@@ -11,18 +11,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(TOKEN_KEY)
-    console.log('=== API REQUEST ===')
-    console.log('URL:', config.url)
-    console.log('TOKEN_KEY:', TOKEN_KEY)
-    console.log('Token from storage:', token ? 'EXISTS' : 'NULL')
-    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-      console.log('Authorization header set')
-    } else {
-      console.error('NO TOKEN FOUND!')
     }
-    
     return config
   },
   (error) => {
@@ -33,17 +24,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log('=== API ERROR ===')
-    console.log('Status:', error.response?.status)
-    console.log('URL:', error.config?.url)
-    console.log('Error data:', error.response?.data)
-    
     if (error.response?.status === 401) {
-      console.log('401 ERROR - Clearing storage and redirecting')
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem('user_data')
-      
-      // Only redirect if not already on login page
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login'
       }
@@ -51,6 +34,11 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// Public APIs (no auth required)
+export const publicAPI = {
+  getStats: () => api.get('/public/stats')
+}
 
 // Auth APIs
 export const authAPI = {
@@ -75,6 +63,7 @@ export const studentAPI = {
 // Admin APIs
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard'),
+  getAnalytics: () => api.get('/admin/analytics'),
   getAllExams: () => api.get('/exams'),
   createExam: (data) => api.post('/exams', data),
   updateExam: (examId, data) => api.patch(`/exams/${examId}`, data),
